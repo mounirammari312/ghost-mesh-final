@@ -4,9 +4,18 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 60 # لمنع استهلاك الوقت في حال حدوث تعليق
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Sovereign Mirror Injection
+        run: |
+          # تحويل المستودعات إلى مرايا Kernel.org العالمية لتجاوز بطء Azure
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu/|http://mirrors.kernel.org/ubuntu/|g' /etc/apt/sources.list
+          sudo sed -i 's|http://archive.ubuntu.com/ubuntu/|http://mirrors.kernel.org/ubuntu/|g' /etc/apt/sources.list
+          sudo apt-get clean
+          sudo apt-get update -y
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -19,13 +28,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Optimized Arsenal Installation
+      - name: Rapid Arsenal Installation
         run: |
-          # تنظيف قوائم المستودعات التالفة لفرض الاتصال بمرايا جديدة وسريعة
-          sudo rm -rf /var/lib/apt/lists/*
-          sudo apt-get clean
-          sudo apt-get update
-          # تثبيت الاعتماديات مع تعطيل التثبيتات المقترحة لتقليل زمن البناء
+          # تثبيت الحزم بأقل قدر من التفاعل والاعتماديات الفرعية
           sudo apt-get install -y --no-install-recommends \
             build-essential git ffmpeg libsdl2-dev libsdl2-image-dev \
             libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev \
@@ -42,10 +47,9 @@ jobs:
 
       - name: Execute Buildozer Engine
         run: |
-          # تأكيد الموافقة على التراخيص وتشغيل المحرك
+          # تنفيذ البناء مع فرض الموافقة التلقائية
           yes | buildozer -v android debug
         env:
-          # ضمان استخدام الجافا الصحيحة المثبتة في الخطوات السابقة
           JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
 
       - name: Upload Final APK
