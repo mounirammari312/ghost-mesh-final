@@ -8,28 +8,35 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Industrial Dependencies
+      - name: Install System Arsenal (Including Rust)
         run: |
           sudo apt update
-          sudo apt install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev lzma lzma-dev tk-dev zip unzip openjdk-17-jdk pkg-config libtinfo5
+          sudo apt install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev lzma lzma-dev tk-dev zip unzip pkg-config libtinfo5 rustc cargo
 
-      - name: Install Python Arsenal
+      - name: Install Python Tools
         run: |
           pip install --upgrade pip
           pip install cython==0.29.33 buildozer packaging tomli jinja2 MarkupSafe toml build appdirs colorama sh six
 
       - name: Execute Buildozer Engine
         run: |
-          # حقن الموافقة المسبقة على كافة التراخيص لتجنب توقف المحرك
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
+          # تنظيف بقايا الفشل السابق لضمان نزاهة البناء
+          buildozer android clean
+          # بدء التجميع الفعلي مع الموافقة التلقائية
           yes | buildozer -v android debug
-        # استخدام yes | هنا ضروري هندسياً لأن الخادم لا يمتلك لوحة مفاتيح بشرية
+        env:
+          JAVA_HOME: /usr/lib/jvm/temurin-17-amd64 # فرض مسار الجافا الصحيح
 
       - name: Upload Final APK
         uses: actions/upload-artifact@v4
