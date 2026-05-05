@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install System Arsenal (Including Rust)
+      - name: Install System Arsenal
         run: |
           sudo apt update
           sudo apt install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev lzma lzma-dev tk-dev zip unzip pkg-config libtinfo5 rustc cargo
@@ -31,12 +31,15 @@ jobs:
 
       - name: Execute Buildozer Engine
         run: |
-          # تنظيف بقايا الفشل السابق لضمان نزاهة البناء
-          buildozer android clean
-          # بدء التجميع الفعلي مع الموافقة التلقائية
+          # تأمين مسار الأدوات المحلية
+          export PATH=$PATH:$HOME/.local/bin
+          # التأكد من وجود ملف التوصيف
+          if [ ! -f buildozer.spec ]; then
+            echo "ERROR: buildozer.spec is missing in the root directory!"
+            exit 1
+          fi
+          # تشغيل البناء مباشرة (بدون clean لتجنب فشل الإقلاع)
           yes | buildozer -v android debug
-        env:
-          JAVA_HOME: /usr/lib/jvm/temurin-17-amd64 # فرض مسار الجافا الصحيح
 
       - name: Upload Final APK
         uses: actions/upload-artifact@v4
