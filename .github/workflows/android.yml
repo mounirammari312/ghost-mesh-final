@@ -19,10 +19,21 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install System Arsenal
+      - name: Optimized Arsenal Installation
         run: |
-          sudo apt update
-          sudo apt install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev lzma lzma-dev tk-dev zip unzip pkg-config libtinfo5 rustc cargo
+          # تنظيف قوائم المستودعات التالفة لفرض الاتصال بمرايا جديدة وسريعة
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get clean
+          sudo apt-get update
+          # تثبيت الاعتماديات مع تعطيل التثبيتات المقترحة لتقليل زمن البناء
+          sudo apt-get install -y --no-install-recommends \
+            build-essential git ffmpeg libsdl2-dev libsdl2-image-dev \
+            libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev \
+            libavformat-dev libavcodec-dev zlib1g-dev libsqlite3-dev \
+            sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev \
+            libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev \
+            libffi-dev uuid-dev lzma lzma-dev tk-dev zip unzip pkg-config \
+            libtinfo5 rustc cargo
 
       - name: Install Python Tools
         run: |
@@ -31,15 +42,11 @@ jobs:
 
       - name: Execute Buildozer Engine
         run: |
-          # تأمين مسار الأدوات المحلية
-          export PATH=$PATH:$HOME/.local/bin
-          # التأكد من وجود ملف التوصيف
-          if [ ! -f buildozer.spec ]; then
-            echo "ERROR: buildozer.spec is missing in the root directory!"
-            exit 1
-          fi
-          # تشغيل البناء مباشرة (بدون clean لتجنب فشل الإقلاع)
+          # تأكيد الموافقة على التراخيص وتشغيل المحرك
           yes | buildozer -v android debug
+        env:
+          # ضمان استخدام الجافا الصحيحة المثبتة في الخطوات السابقة
+          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
 
       - name: Upload Final APK
         uses: actions/upload-artifact@v4
