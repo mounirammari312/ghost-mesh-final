@@ -11,28 +11,26 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: System Hardening & Dependencies
+      - name: Install System Arsenal
         run: |
-          sudo rm -rf /var/lib/apt/lists/*
-          sudo apt clean
-          sudo apt update --fix-missing
+          sudo apt update
           sudo apt install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev lzma lzma-dev tk-dev zip unzip openjdk-17-jdk
 
-      - name: Install Buildozer & Cython
+      - name: Install Build Tools
         run: |
           pip install --upgrade pip
           pip install cython==0.29.33 buildozer packaging tomli jinja2 MarkupSafe toml build appdirs colorama sh six
 
-      - name: Build APK with Buildozer
+      - name: Compiling APK
         run: |
           yes | buildozer -v android debug
 
-      - name: Upload APK Artifact
+      - name: Export Final Product
         uses: actions/upload-artifact@v4
         with:
           name: GhostMesh-APK-Package
