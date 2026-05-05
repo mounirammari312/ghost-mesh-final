@@ -3,67 +3,60 @@ import sys
 import time
 import os
 
-# إدماج المسارات لضمان وصول المجمّع للمجلدات الفرعية في أندرويد
+# إعداد المسارات المطلقة لضمان عمل الاستيراد في بيئة أندرويد المعزولة
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.clock import Clock
-from kivy.utils import platform
 
-# استيراد المحركات السيادية
+# استيراد المكونات السيادية للنظام
 from security.handshake import GhostHandshake
 from core.discovery import GhostDiscovery
 from core.tunnel import GhostTunnel
 
 class GhostMeshApp(App):
     def build(self):
-        # واجهة النظام البسيطة لضمان استقرار النشاط
-        self.title = "GHOST-MESH CORE"
+        self.title = "GHOST-MESH V1.0"
         self.label = Label(
-            text="[GHOST-MESH]\nINITIALIZING SYSTEM...",
+            text="[GHOST-MESH]\nSYSTEM BOOTING...",
             halign="center",
-            font_size='18sp'
+            font_size='16sp'
         )
         return self.label
 
     def on_start(self):
-        # إطلاق المحرك البرمجي في خيط منفصل لمنع تجميد الواجهة
-        threading.Thread(target=self.initialize_engine, daemon=True).start()
+        # تشغيل المحرك في خيط مستقل لضمان استجابة الواجهة الرسومية
+        threading.Thread(target=self.run_system_core, daemon=True).start()
 
-    def update_status(self, message):
-        # تحديث الواجهة من خلال خيط Kivy الرئيسي
-        self.label.text = f"[GHOST-MESH]\nSTATUS: {message}"
+    def update_ui_status(self, message):
+        self.label.text = f"[GHOST-MESH]\n{message}"
 
-    def initialize_engine(self):
+    def run_system_core(self):
         try:
-            Clock.schedule_once(lambda dt: self.update_status("BOOTING CORE..."), 0)
+            Clock.schedule_once(lambda dt: self.update_ui_status("CORE INITIALIZING..."), 0)
             
-            # إعداد الهوية السيادية للعقدة
-            self.node_id = "ALGERIA_CORE_PRIMARY"
             self.security = GhostHandshake()
             self.discovery = GhostDiscovery()
             self.tunnel = GhostTunnel()
 
-            # توليد مفاتيح RSA
-            Clock.schedule_once(lambda dt: self.update_status("GENERATING RSA KEYS..."), 0)
+            Clock.schedule_once(lambda dt: self.update_ui_status("GENERATING RSA ENGINE..."), 0)
             self.security.generate_node_keys()
 
-            # تفعيل بروتوكولات الاكتشاف والنفق
+            # إطلاق بروتوكولات الشبكة والاكتشاف
             threading.Thread(target=self.discovery.listen_for_peers, daemon=True).start()
             threading.Thread(target=self.tunnel.start_proxy, daemon=True).start()
 
-            Clock.schedule_once(lambda dt: self.update_status("SYSTEM OPERATIONAL"), 0)
+            Clock.schedule_once(lambda dt: self.update_ui_status("STATUS: OPERATIONAL"), 0)
 
-            # حلقة البث المستمر
             while True:
-                self.discovery.broadcast_presence(self.node_id)
+                self.discovery.broadcast_presence("ALGERIA_CORE_PRIMARY")
                 time.sleep(15)
                 
         except Exception as e:
-            error_msg = f"CRITICAL ERROR: {str(e)}"
-            Clock.schedule_once(lambda dt: self.update_status(error_msg), 0)
+            # في حال حدوث خطأ، يتم عرضه فوراً على الشاشة للتشخيص
+            Clock.schedule_once(lambda dt: self.update_ui_status(f"CRITICAL ERROR:\n{str(e)}"), 0)
 
 if __name__ == "__main__":
     GhostMeshApp().run()
