@@ -1,12 +1,9 @@
 name: Ghost-Mesh Production Build
 on: [push]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # النسخة الأكثر استقراراً في 2026
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -16,22 +13,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install System Arsenal
+      - name: Install Build Arsenal
         run: |
           sudo apt update
           sudo apt install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev lzma lzma-dev tk-dev zip unzip openjdk-17-jdk
 
-      - name: Install Build Tools
+      - name: Install Python Tools
         run: |
           pip install --upgrade pip
           pip install cython==0.29.33 buildozer packaging tomli jinja2 MarkupSafe toml build appdirs colorama sh six
 
-      - name: Compiling APK
+      - name: Execute Buildozer
         run: |
           yes | buildozer -v android debug
 
-      - name: Export Final Product
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: GhostMesh-APK-Package
+          name: GhostMesh-APK
           path: bin/*.apk
