@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # التحول الإجباري لضمان توافق الـ NDK والتشفير
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -25,9 +25,11 @@ jobs:
 
       - name: Execute Buildozer Engine
         run: |
-          # تفعيل وضع التفصيل الكامل لكشف أي خلل في التشفير
-          buildozer -v android debug
-        # ملاحظة: أزلت أمر "yes |" لأن النظام الحالي سيتكفل بالرخص بشكل آلي ومنظم
+          # حقن الموافقة المسبقة على كافة التراخيص لتجنب توقف المحرك
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          yes | buildozer -v android debug
+        # استخدام yes | هنا ضروري هندسياً لأن الخادم لا يمتلك لوحة مفاتيح بشرية
 
       - name: Upload Final APK
         uses: actions/upload-artifact@v4
