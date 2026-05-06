@@ -1,0 +1,27 @@
+name: GBO Sovereign Forge (Cloud Build)
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  build-native:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Sovereignty Code
+      uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Android SDK 36
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: 36
+    - name: Setup NDK
+      uses: nndemyanov/setup-ndk@v1
+      with:
+        ndk-version: r26b
+    - name: Build C++ Native Engine
+      run: |
+        echo "Starting Architectural Build for SDK 36..."
+        # سيتم إضافة أوامر CMake التفصيلية في المرحلة القادمة
