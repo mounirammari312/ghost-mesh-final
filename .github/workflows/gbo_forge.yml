@@ -6,6 +6,10 @@ on:
 jobs:
   build-native:
     runs-on: ubuntu-latest
+    # تعريف المسار المطلق كمتغير بيئي لضمان التوحيد
+    env:
+      GBO_ABS_PATH: /home/runner/work/gbo-sovereign-engine/gbo-sovereign-engine
+    
     steps:
     - name: Checkout Sovereignty Code
       uses: actions/checkout@v4
@@ -23,14 +27,15 @@ jobs:
 
     - name: Install NDK Directly (Sovereign Method)
       run: |
-        # استخدام المحمل الرسمي لضمان عدم الانهيار المستقبلي
         sdkmanager --install "ndk;26.1.10909125"
         echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
 
-    - name: Build C++ Native Engine (Absolute Path Strategy)
+    - name: Build C++ Native Engine (Standardized Absolute Path)
       run: |
         echo "Starting Architectural Build for SDK 36..."
-        # التأكد من وجود المجلدات بالمسارات المطلقة
-        mkdir -p /root/gbo_project/core/native_engine/build
-        # ملاحظة: سيتم إضافة كود CMake الفعلي في الخطوة القادمة
-        echo "Build structure validated."
+        # استخدام المسار النسبي للمجلد الحالي كمسار مطلق للعملية
+        mkdir -p core/native_engine/build
+        cd core/native_engine/build
+        echo "Build directory created at: $(pwd)"
+        # التحقق من وجود ملفات المشروع
+        ls -R $GITHUB_WORKSPACE
